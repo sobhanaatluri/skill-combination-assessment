@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skill-Combination Assessment in Interviews</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,500;6..12,600;6..12,700;6..12,800&display=swap">
+<style>
+/* Layout: one input table (tasks, time, links) feeding one instrument (the skill network and its density). Single light theme by choice. */
+:root {
+  color-scheme: light;
+  --bg: #f5f6f7;
+  --surface: #fcfcfb;
+  --line: #dcdfe3;
+  --line-soft: #e9ebee;
+  --ink: #15181c;
+  --ink-2: #4c525a;
+  --ink-3: #7b828b;
+  --accent: #2a78d6;
+  --cell-on: #15181c;
+  --cell-off: #eef0f2;
+  --over: #c23434;
+  --tint: #e9f1fb;
+  --tint-ink: #1d5aa6;
+  --in-tint: #fdf1e2;
+  --in-line: #f1d3ac;
+  --in-ink: #9a520b;
+  --f-display: "Nunito Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-body: "Nunito Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "Nunito Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 14px; line-height: 1.5; }
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-block: 28px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid;
+  gap: 20px;
+}
+header { display: grid; gap: 8px; max-width: 760px; }
+.eyebrow { font-family: var(--f-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+h1 { font-family: var(--f-display); font-weight: 600; font-size: clamp(28px, 4vw, 40px); line-height: 1.05; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--f-display); font-weight: 600; font-size: 19px; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+.sub { color: var(--ink-2); max-width: 72ch; }
+.note { font-size: 12px; color: var(--ink-3); max-width: 72ch; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
+.head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 10px; }
+.head > div { display: grid; gap: 4px; min-width: 0; }
+.btn { font: inherit; font-size: 13px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 7px; padding: 7px 12px; cursor: pointer; }
+.btn:hover { border-color: var(--ink-3); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.grid-wrap { overflow-x: auto; }
+table { border-collapse: collapse; font-size: 13px; }
+.grid thead th { height: 186px; vertical-align: bottom; padding: 0 2px 6px; white-space: nowrap; font-weight: 500; color: var(--ink-2); }
+.grid thead th.l { text-align: left; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); padding-right: 12px; }
+.grid thead th div { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 12px; }
+.grid tbody th { text-align: left; font-weight: 500; padding: 4px 14px 4px 0; white-space: nowrap; }
+.grid td { padding: 2px; }
+.grid td.time { padding-right: 14px; }
+.time-ctl { display: grid; grid-template-columns: 11.5em 6.5em 7.5em; gap: 6px; align-items: center; }
+.time-ctl select { width: 100%; font: inherit; font-size: 12.5px; padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); }
+.time-ctl .val { white-space: nowrap; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.seg button { font: inherit; font-size: 13px; border: 0; background: transparent; color: var(--ink-2); padding: 4px 10px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+.rm { font: inherit; font-size: 14px; line-height: 1; width: 22px; height: 22px; border-radius: 5px; border: 1px solid transparent; background: transparent; color: var(--ink-3); cursor: pointer; padding: 0; }
+.rm:hover { border-color: var(--line); color: var(--over); }
+.grid thead tr.rm-row th { height: auto; padding: 2px 2px 6px; text-align: center; }
+.tname { display: inline-flex; align-items: center; gap: 6px; }
+.adders { display: grid; gap: 14px; grid-template-columns: 1fr; }
+@media (min-width: 760px) { .adders { grid-template-columns: 1fr 1fr; } }
+.adder { display: grid; gap: 6px; min-width: 0; }
+.adder label { font-size: 12px; font-weight: 500; color: var(--ink-2); }
+.adder-row { display: flex; gap: 8px; }
+.adder-row input { flex: 1; min-width: 0; font: inherit; padding: 7px 9px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--ink); }
+.budget { display: grid; gap: 8px; max-width: 640px; }
+.budget-top { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: 13px; }
+.budget-top label { color: var(--ink-2); }
+.budget-top input { width: 64px; font: inherit; font-family: var(--f-mono); font-size: 13px; padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); text-align: right; }
+.budget-bar { position: relative; height: 12px; background: var(--line-soft); border-radius: 0 6px 6px 0; overflow: hidden; }
+.budget-bar .fill { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 0 6px 6px 0; }
+.budget-bar .over { position: absolute; inset: 0 0 0 auto; background: var(--over); }
+.budget-msg { font-size: 13px; font-weight: 500; }
+.budget-msg.is-over { color: var(--over); }
+.budget-msg.is-under { color: var(--ink-2); }
+.val { font-family: var(--f-mono); font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; text-align: right; }
+.cell { width: 26px; height: 26px; border-radius: 5px; border: 1px solid var(--line); background: var(--cell-off); cursor: pointer; padding: 0; display: block; }
+.cell[aria-pressed="true"] { background: var(--cell-on); border-color: var(--cell-on); }
+.cell:hover { border-color: var(--ink-3); }
+.grid tfoot td { padding-top: 8px; font-size: 12px; color: var(--ink-3); }
+
+.result { display: grid; gap: 20px; grid-template-columns: 1fr; align-items: start; }
+@media (min-width: 900px) { .result { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); } }
+svg { display: block; width: 100%; height: auto; }
+svg text { font-family: var(--f-body); fill: var(--ink-2); }
+
+.dens { display: grid; gap: 14px; }
+.metric { display: grid; gap: 6px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 8px; }
+.metric .k { font-size: 12px; font-weight: 500; color: var(--ink-2); }
+.metric .v { font-family: var(--f-mono); font-size: 30px; font-weight: 500; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.metric .calc { font-family: var(--f-mono); font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.metric p { font-size: 13px; color: var(--ink-2); }
+
+.tests { display: grid; gap: 14px; grid-template-columns: 1fr; }
+@media (min-width: 820px) { .tests { grid-template-columns: 1fr 1fr; } }
+.test { border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.test-head { display: grid; gap: 6px; }
+.test-head h3 { font-family: var(--f-display); font-weight: 600; font-size: 16px; margin: 0; text-wrap: balance; }
+.meta { display: grid; grid-template-columns: 90px 1fr; gap: 10px; align-items: center; font-size: 12px; color: var(--ink-2); }
+.meta .track { height: 6px; background: var(--line-soft); border-radius: 0 3px 3px 0; overflow: hidden; }
+.meta .fill { height: 100%; background: var(--accent); border-radius: 0 3px 3px 0; }
+.meta b { font-family: var(--f-mono); font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
+.q { display: grid; gap: 3px; }
+.q .k { font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+.q p { font-size: 13.5px; }
+.q ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13.5px; }
+.q ul em { font-style: normal; font-weight: 500; }
+.group { font-family: var(--f-display); font-weight: 500; font-size: 15px; margin: 6px 0 0; color: var(--ink-2); }
+.test.triad { border-color: var(--accent); }
+.listen { font-size: 13px; color: var(--ink-2); border-top: 1px solid var(--line-soft); padding-top: 9px; }
+
+.example-note { font-size: 13.5px; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; max-width: 72ch; }
+.flow-legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 12px; color: var(--ink-2); }
+.flow-legend span { display: inline-flex; align-items: center; gap: 7px; }
+.flow-legend i { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+.flow-legend .k-in { border: 1.5px solid var(--in-line); background: var(--in-tint); }
+.flow-legend .k-out { background: var(--tint); border: 1.5px solid var(--tint); }
+.flow { display: flex; flex-direction: column; align-items: stretch; gap: 4px; }
+.step { position: relative; border: 1.5px solid var(--in-line); border-radius: 10px; padding: 14px 14px 16px; background: var(--in-tint); display: grid; gap: 8px; align-content: start; min-width: 0; }
+.step.out { background: var(--tint); border-color: var(--tint); }
+.step .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.step .num { font-family: var(--f-mono); font-size: 11px; letter-spacing: .06em; color: var(--in-ink); }
+.step:not(.out) svg.glyph { color: var(--in-ink); }
+.step:not(.out) .eg { border-top-color: var(--in-line); }
+.step:not(.out) .choice span { background: var(--surface); border-color: var(--in-line); }
+.step.out .num { color: var(--tint-ink); }
+.step svg.glyph { width: 46px; height: 30px; flex: none; color: var(--ink-2); }
+.step.out svg.glyph { color: var(--tint-ink); }
+.step h3 { font-family: var(--f-display); font-weight: 600; font-size: 16px; margin: 0; color: var(--ink); line-height: 1.2; text-wrap: balance; }
+.step p { font-size: 13px; color: var(--ink-2); }
+.step .eg { font-size: 12px; color: var(--ink-3); border-top: 1px dashed var(--line); padding-top: 7px; }
+.step.out .eg { border-top-color: color-mix(in srgb, var(--tint-ink) 30%, transparent); }
+.choice { display: grid; gap: 4px; }
+.choice span { font-size: 12.5px; padding: 6px 9px; border: 1px solid var(--line); border-radius: 8px; text-align: center; color: var(--ink); background: var(--bg); }
+.choice em { font-style: normal; font-size: 11px; text-align: center; color: var(--ink-3); letter-spacing: .06em; text-transform: uppercase; }
+.arrow { display: flex; justify-content: center; align-items: center; color: var(--ink-3); height: 22px; }
+.arrow svg { width: 18px; height: 18px; transform: rotate(90deg); }
+@media (min-width: 1080px) {
+  .flow { flex-direction: row; gap: 6px; }
+  .step { flex: 1 1 0; }
+  .arrow { flex: 0 0 18px; height: auto; }
+  .arrow svg { transform: none; }
+}
+#tip { position: fixed; z-index: 50; pointer-events: none; background: var(--ink); color: var(--surface); font-size: 12px; line-height: 1.45; padding: 8px 10px; border-radius: 6px; max-width: 280px; white-space: pre-line; box-shadow: 0 4px 16px rgba(0,0,0,.18); }
+@media (prefers-reduced-motion: no-preference) { .cell { transition: background-color .12s, border-color .12s; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Skill-Combination Assessment in Interviews</h1>
+    <p class="sub">Describe a role as the tasks it involves, how much time each takes, and which skills each task needs (yes or no). The page builds the network of skills the role uses together. Two skills are linked when at least one task needs both. A link's strength adds up the share of the week for every task that needs both skills, so it grows with the number of tasks the two skills share and with the time those tasks take.</p>
+  </header>
+
+  <section class="panel" aria-labelledby="flowTitle">
+    <div class="head">
+      <div>
+        <h2 id="flowTitle">How the framework works</h2>
+        <p class="sub">Six steps from a job opening to the skill combinations worth testing in interviews.</p>
+      </div>
+      <div class="flow-legend"><span><i class="k-in"></i>You provide</span><span><i class="k-out"></i>Generated from your input</span></div>
+    </div>
+    <div class="flow">
+      <div class="step">
+        <div class="top"><span class="num">01</span>
+          <svg class="glyph" viewBox="0 0 46 30" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="9" y="6" width="16" height="22" rx="1.5"/><rect x="25" y="13" width="12" height="15" rx="1.5"/><path d="M13 11h3M18 11h3M13 16h3M18 16h3M13 21h3M18 21h3M29 18h4M29 23h4"/></svg></div>
+        <h3>Set the context</h3>
+        <p>Job title, team or division, company, and a short description of what the company does.</p>
+        <p class="eg">Example: Technical program manager · Autonomy programs · autonomous trucking startup</p>
+      </div>
+      <div class="arrow" aria-hidden="true"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h11M10 5l4 4-4 4"/></svg></div>
+      <div class="step">
+        <div class="top"><span class="num">02</span>
+          <svg class="glyph" viewBox="0 0 46 30" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 3h13l5 5v19H8z"/><path d="M21 3v5h5M12 13h10M12 17h10M12 21h7"/><path d="M32 10h8M32 16h8M32 22h8" stroke-linecap="round"/><circle cx="30" cy="10" r=".6" fill="currentColor"/></svg></div>
+        <h3>Describe the job</h3>
+        <div class="choice"><span>Paste a job description</span><em>or</em><span>List tasks and skills</span></div>
+      </div>
+      <div class="arrow" aria-hidden="true"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h11M10 5l4 4-4 4"/></svg></div>
+      <div class="step out">
+        <div class="top"><span class="num">03</span>
+          <svg class="glyph" viewBox="0 0 46 30" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.2"><rect x="8" y="3" width="6" height="6" rx="1"/><rect x="16" y="3" width="6" height="6" rx="1"/><rect x="24" y="3" width="6" height="6" rx="1"/><rect x="32" y="3" width="6" height="6" rx="1"/><rect x="8" y="12" width="6" height="6" rx="1"/><rect x="16" y="12" width="6" height="6" rx="1"/><rect x="24" y="12" width="6" height="6" rx="1"/><rect x="32" y="12" width="6" height="6" rx="1"/><rect x="8" y="21" width="6" height="6" rx="1"/><rect x="16" y="21" width="6" height="6" rx="1"/><rect x="24" y="21" width="6" height="6" rx="1"/><rect x="32" y="21" width="6" height="6" rx="1"/></g><g fill="currentColor"><rect x="8" y="3" width="6" height="6" rx="1"/><rect x="24" y="3" width="6" height="6" rx="1"/><rect x="16" y="12" width="6" height="6" rx="1"/><rect x="32" y="12" width="6" height="6" rx="1"/><rect x="8" y="21" width="6" height="6" rx="1"/><rect x="24" y="21" width="6" height="6" rx="1"/></g></svg></div>
+        <h3>Build the task × skill matrix</h3>
+        <p>Tasks as rows, skills as columns, and a mark wherever a task needs a skill. Review and correct it before going on.</p>
+      </div>
+      <div class="arrow" aria-hidden="true"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h11M10 5l4 4-4 4"/></svg></div>
+      <div class="step">
+        <div class="top"><span class="num">04</span>
+          <svg class="glyph" viewBox="0 0 46 30" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M8 6h26M8 12h16M8 18h30M8 24h10"/></svg></div>
+        <h3>Add time share</h3>
+        <p>For each task, how often it happens and how long it takes, against the length of the working week.</p>
+      </div>
+      <div class="arrow" aria-hidden="true"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h11M10 5l4 4-4 4"/></svg></div>
+      <div class="step out">
+        <div class="top"><span class="num">05</span>
+          <svg class="glyph" viewBox="0 0 46 30" aria-hidden="true"><g stroke="currentColor" fill="none"><path d="M10 8L23 4M10 8L16 24M23 4L36 10M23 4L16 24M16 24L32 25M36 10L32 25M23 4L32 25" stroke-width="1.2"/><path d="M23 4L16 24" stroke-width="3"/></g><g fill="currentColor"><circle cx="10" cy="8" r="2.6"/><circle cx="23" cy="4" r="3.2"/><circle cx="36" cy="10" r="2.6"/><circle cx="16" cy="24" r="3.2"/><circle cx="32" cy="25" r="2.6"/></g></svg></div>
+        <h3>Compute the skill network</h3>
+        <p>Two skills are linked when a task needs both. Links strengthen with more shared tasks and more time.</p>
+      </div>
+      <div class="arrow" aria-hidden="true"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h11M10 5l4 4-4 4"/></svg></div>
+      <div class="step out">
+        <div class="top"><span class="num">06</span>
+          <svg class="glyph" viewBox="0 0 46 30" aria-hidden="true"><path d="M30 5L41 25H19z" fill="currentColor" fill-opacity=".22" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M5 22L14 8" stroke="currentColor" stroke-width="2.4"/><g fill="currentColor"><circle cx="5" cy="22" r="2.8"/><circle cx="14" cy="8" r="2.8"/><circle cx="30" cy="5" r="2.8"/><circle cx="41" cy="25" r="2.8"/><circle cx="19" cy="25" r="2.8"/></g></svg></div>
+        <h3>Find dyads and triads to test</h3>
+        <p>The strongest pairs and three-way groups of skills, each with an interview question and follow-ups.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="head">
+      <div>
+        <p class="example-note">The example below is a test case: a technical program manager at an autonomous trucking company. Add or remove tasks and skills, and change the working week, to model a different role at a different company.</p>
+        <h2>Tasks, time and the skills they need</h2>
+        <p class="sub">For each task, pick how often it happens and how long it usually takes. The page converts that to approximate hours per week. Changing one task never changes another; the bar shows whether the week is over- or under-filled. Click a cell to add or remove a link, and use × to remove a task or skill.</p>
+      </div>
+      <button class="btn" id="reset" type="button">Reset to example</button>
+    </div>
+    <div class="budget">
+      <div class="budget-top">
+        <label for="week">Working week</label>
+        <div class="seg" id="weekPresets" role="group" aria-label="Week presets">
+          <button type="button" data-h="40">40 h</button>
+          <button type="button" data-h="50">50 h</button>
+          <button type="button" data-h="60">60 h</button>
+        </div>
+        <span><input id="week" type="number" min="1" max="100" step="1" value="50" aria-label="Working week in hours"> h</span>
+        <span class="budget-msg" id="budgetMsg"></span>
+      </div>
+      <div class="budget-bar" id="budgetBar"></div>
+    </div>
+    <div class="grid-wrap"><table class="grid" id="grid"></table></div>
+    <div class="adders">
+      <form id="addTaskForm" class="adder">
+        <label for="newTask">Add a task</label>
+        <div class="adder-row"><input id="newTask" type="text" placeholder="e.g. Plan the next freight lane launch" autocomplete="off"><button class="btn" type="submit">Add task</button></div>
+        <p class="note" id="taskMsg" hidden></p>
+      </form>
+      <form id="addSkillForm" class="adder">
+        <label for="newSkill">Add a skill</label>
+        <div class="adder-row"><input id="newSkill" type="text" placeholder="e.g. Simulation and test coverage" autocomplete="off"><button class="btn" type="submit">Add skill</button></div>
+        <p class="note" id="skillMsg" hidden></p>
+      </form>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="head">
+      <div>
+        <h2>Skill network</h2>
+        <p class="sub">Each line is a pair of skills needed by at least one shared task. A line gets thicker as the two skills share more tasks and as those tasks take more of the week.</p>
+      </div>
+    </div>
+    <div class="result">
+      <div id="net"></div>
+      <div class="dens" id="dens"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="head">
+      <div>
+        <h2>Dyads and triads to test for</h2>
+        <p class="sub">The skill combinations the role uses together most, ranked by share of the week. Each comes with a sample question built on the task that creates it, plus one follow-up per skill. Ties at the cutoff are all shown.</p>
+      </div>
+    </div>
+    <h3 class="group">Triads: three skills joined by strong links in the network</h3>
+    <div class="tests" id="triads"></div>
+    <h3 class="group">Dyads: two skills joined by a strong link</h3>
+    <div class="tests" id="tests"></div>
+  </section>
+</div>
+<div id="tip" hidden></div>
+
+<script>
+const DEFAULT_SKILLS = [
+  "Autonomy system integration",
+  "Hardware–software integration",
+  "Safety case and validation",
+  "Field operations",
+  "Regulatory awareness",
+  "Scheduling & planning",
+  "Risk management",
+  "Data analysis",
+  "Technical writing",
+  "Stakeholder communication",
+  "Negotiation",
+  "Budgeting",
+  "Team facilitation",
+];
+
+const FREQ = [
+  ["Daily", 5],
+  ["Few times a week", 2.5],
+  ["Weekly", 1],
+  ["Every two weeks", 0.5],
+  ["Monthly", 12 / 52],
+  ["Quarterly", 4 / 52],
+];
+const DUR = [
+  ["15 min", 0.25],
+  ["30 min", 0.5],
+  ["1 hour", 1],
+  ["2 hours", 2],
+  ["Half day", 4],
+  ["Full day", 8],
+  ["Two days", 16],
+];
+const FREQ_PER_WEEK = Object.fromEntries(FREQ);
+const DUR_HOURS = Object.fromEntries(DUR);
+
+const DEFAULT_TASKS = [
+  { name: "Run sprint planning and cross-team syncs", freq: "Daily", dur: "1 hour", skills: ["Scheduling & planning", "Team facilitation", "Stakeholder communication"] },
+  { name: "Review integration plans for a new sensor or compute platform", freq: "Weekly", dur: "Half day", skills: ["Autonomy system integration", "Hardware–software integration", "Risk management"] },
+  { name: "Track OEM vehicle integration milestones", freq: "Few times a week", dur: "2 hours", skills: ["Hardware–software integration", "Scheduling & planning", "Negotiation"] },
+  { name: "Run release readiness for a software drop to the test fleet", freq: "Every two weeks", dur: "Full day", skills: ["Safety case and validation", "Autonomy system integration", "Risk management", "Scheduling & planning"] },
+  { name: "Lead technical troubleshooting when the fleet or a build is blocked", freq: "Few times a week", dur: "1 hour", skills: ["Autonomy system integration", "Hardware–software integration", "Data analysis", "Field operations"] },
+  { name: "Coordinate on-road validation runs", freq: "Few times a week", dur: "2 hours", skills: ["Field operations", "Safety case and validation", "Scheduling & planning", "Data analysis"] },
+  { name: "Align priorities across autonomy teams", freq: "Weekly", dur: "Half day", skills: ["Stakeholder communication", "Negotiation", "Autonomy system integration"] },
+  { name: "Lead reviews of disengagements and on-road incidents", freq: "Few times a week", dur: "1 hour", skills: ["Safety case and validation", "Data analysis", "Technical writing", "Field operations"] },
+  { name: "Write status reports for leadership", freq: "Weekly", dur: "Half day", skills: ["Technical writing", "Stakeholder communication", "Data analysis"] },
+  { name: "Prepare regulatory and safety documentation", freq: "Monthly", dur: "Full day", skills: ["Regulatory awareness", "Safety case and validation", "Technical writing"] },
+  { name: "Manage sensor and compute supplier contracts", freq: "Monthly", dur: "Full day", skills: ["Negotiation", "Budgeting", "Hardware–software integration"] },
+];
+
+const DEFAULT_WEEK = 50;
+let nextId = 1;
+const hoursOf = t => FREQ_PER_WEEK[t.freq] * DUR_HOURS[t.dur];
+const fmtH = v => v >= 10 ? Math.round(v).toString() : (Math.round(v * 10) / 10).toString();
+
+const fresh = () => ({
+  week: DEFAULT_WEEK,
+  skills: [...DEFAULT_SKILLS],
+  tasks: DEFAULT_TASKS.map(t => ({ id: "t" + nextId++, name: t.name, freq: t.freq, dur: t.dur, skills: new Set(t.skills) })),
+});
+let state = fresh();
+
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const pct = v => Math.round(v * 100) + "%";
+
+function analyze() {
+  const hours = state.tasks.map(hoursOf);
+  const total = hours.reduce((a, b) => a + b, 0);
+  const share = hours.map(h => h / state.week);
+  const skills = state.skills.filter(s => state.tasks.some((t, i) => share[i] > 0 && t.skills.has(s)));
+  const pairs = new Map();
+  state.tasks.forEach((t, i) => {
+    if (share[i] <= 0) return;
+    const ss = state.skills.filter(s => t.skills.has(s));
+    for (let a = 0; a < ss.length; a++) {
+      for (let b = a + 1; b < ss.length; b++) {
+        const key = ss[a] + "|" + ss[b];
+        if (!pairs.has(key)) pairs.set(key, { a: ss[a], b: ss[b], w: 0, tasks: [] });
+        const p = pairs.get(key);
+        p.w += share[i];
+        p.tasks.push(t.name);
+      }
+    }
+  });
+  const edges = [...pairs.values()].sort((x, y) => y.w - x.w);
+
+  const triads = [];
+  for (let i = 0; i < skills.length; i++)
+    for (let j = i + 1; j < skills.length; j++)
+      for (let k = j + 1; k < skills.length; k++) {
+        const [x, y, z] = [skills[i], skills[j], skills[k]];
+        const e = [pairs.get(x + "|" + y), pairs.get(x + "|" + z), pairs.get(y + "|" + z)];
+        if (e.some(v => !v)) continue;
+        const together = state.tasks.filter((t, ti) => share[ti] > 0 && t.skills.has(x) && t.skills.has(y) && t.skills.has(z)).map(t => t.name);
+        triads.push({ skills: [x, y, z], edges: e, w: Math.min(...e.map(v => v.w)), sum: e.reduce((a, v) => a + v.w, 0), together });
+      }
+  triads.sort((p, q) => q.w - p.w || q.sum - p.sum);
+
+  const n = skills.length;
+  const possible = n * (n - 1) / 2;
+  const sumW = edges.reduce((a, e) => a + e.w, 0);
+  return { hours, share, total, skills, edges, triads, n, possible, sumW,
+           binary: possible ? edges.length / possible : 0,
+           weighted: possible ? sumW / possible : 0 };
+}
+
+function renderGrid() {
+  const S = state.skills;
+  const head = `<thead>
+    <tr><th class="l">Task</th><th class="l">How often · how long · ≈ per week</th>${S.map(s => `<th scope="col"><div>${esc(s)}</div></th>`).join("")}</tr>
+    <tr class="rm-row"><th></th><th></th>${S.map((s, j) => `<th><button type="button" class="rm" data-skill="${j}" aria-label="Remove skill ${esc(s)}" title="Remove ${esc(s)}">×</button></th>`).join("")}</tr>
+  </thead>`;
+  const body = state.tasks.map(t => `<tr data-id="${t.id}"><th scope="row"><span class="tname"><button type="button" class="rm" data-task="${t.id}" aria-label="Remove task ${esc(t.name)}" title="Remove this task">×</button>${esc(t.name)}</span></th>
+    <td class="time"><div class="time-ctl">
+      <select id="freq-${t.id}" data-id="${t.id}" data-k="freq" aria-label="How often: ${esc(t.name)}">${FREQ.map(([f]) => `<option${f === t.freq ? " selected" : ""}>${f}</option>`).join("")}</select>
+      <select id="dur-${t.id}" data-id="${t.id}" data-k="dur" aria-label="How long each time: ${esc(t.name)}">${DUR.map(([d]) => `<option${d === t.dur ? " selected" : ""}>${d}</option>`).join("")}</select>
+      <span class="val" id="share-${t.id}"></span></div></td>
+    ${S.map((s, j) => `<td><button type="button" class="cell" data-id="${t.id}" data-j="${j}" aria-pressed="${t.skills.has(s)}" aria-label="${esc(t.name)} needs ${esc(s)}"></button></td>`).join("")}</tr>`).join("");
+  const empty = state.tasks.length ? "" : `<tr><td colspan="${S.length + 2}" class="note">No tasks yet. Add one below.</td></tr>`;
+  const g = document.getElementById("grid");
+  g.innerHTML = head + "<tbody>" + body + empty + "</tbody>";
+  const byId = id => state.tasks.find(t => t.id === id);
+  g.querySelectorAll(".time-ctl select").forEach(sel => {
+    sel.onchange = () => { byId(sel.dataset.id)[sel.dataset.k] = sel.value; update(); };
+  });
+  g.querySelectorAll(".cell").forEach(c => {
+    c.onclick = () => {
+      const t = byId(c.dataset.id), s = state.skills[+c.dataset.j];
+      if (t.skills.has(s)) t.skills.delete(s); else t.skills.add(s);
+      c.setAttribute("aria-pressed", String(t.skills.has(s)));
+      update();
+    };
+  });
+  g.querySelectorAll(".rm[data-task]").forEach(b => {
+    b.onclick = () => { state.tasks = state.tasks.filter(t => t.id !== b.dataset.task); renderAll(); };
+  });
+  g.querySelectorAll(".rm[data-skill]").forEach(b => {
+    b.onclick = () => {
+      const s = state.skills[+b.dataset.skill];
+      state.skills = state.skills.filter(x => x !== s);
+      state.tasks.forEach(t => t.skills.delete(s));
+      renderAll();
+    };
+  });
+}
+
+function setMsg(id, text) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.hidden = !text;
+}
+
+document.getElementById("addTaskForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const input = document.getElementById("newTask");
+  const name = input.value.trim().replace(/\s+/g, " ");
+  if (!name) { setMsg("taskMsg", "Type a task name first."); return; }
+  if (state.tasks.some(t => t.name.toLowerCase() === name.toLowerCase())) { setMsg("taskMsg", "That task is already in the list."); return; }
+  state.tasks.push({ id: "t" + nextId++, name, freq: "Weekly", dur: "1 hour", skills: new Set() });
+  input.value = "";
+  setMsg("taskMsg", `Added "${name}" at weekly, 1 hour. Click cells in its row to say which skills it needs.`);
+  renderAll();
+});
+
+document.getElementById("addSkillForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const input = document.getElementById("newSkill");
+  const name = input.value.trim().replace(/\s+/g, " ");
+  if (!name) { setMsg("skillMsg", "Type a skill name first."); return; }
+  if (state.skills.some(s => s.toLowerCase() === name.toLowerCase())) { setMsg("skillMsg", "That skill is already in the list."); return; }
+  state.skills.push(name);
+  input.value = "";
+  setMsg("skillMsg", `Added "${name}" as a new column. Click cells in that column to link it to tasks.`);
+  renderAll();
+});
+
+function renderNetwork(A) {
+  const W = 780, H = 480, cx = W / 2, cy = H / 2, R = 155;
+  const accent = css("--accent"), ink = css("--ink"), ink3 = css("--ink-3"), surface = css("--surface"), line = css("--line");
+  const pos = {};
+  state.skills.forEach((s, i) => {
+    const a = -Math.PI / 2 + i * 2 * Math.PI / Math.max(state.skills.length, 1);
+    pos[s] = { x: cx + R * Math.cos(a), y: cy + R * Math.sin(a), a };
+  });
+  const maxW = Math.max(...A.edges.map(e => e.w), 1e-9);
+  const strength = {};
+  A.edges.forEach(e => { strength[e.a] = (strength[e.a] || 0) + e.w; strength[e.b] = (strength[e.b] || 0) + e.w; });
+  const maxS = Math.max(...Object.values(strength), 1e-9);
+  let lines = "", hits = "", nodes = "", shades = "";
+  pickTop(A.triads, 2, 4).forEach(tr => {
+    const pts = tr.skills.map(s => `${pos[s].x},${pos[s].y}`).join(" ");
+    shades += `<polygon points="${pts}" fill="${accent}" fill-opacity="0.14" stroke="none" data-tip="${esc(`${tr.skills.join(" + ")}\nWeakest of the three links: ${pct(tr.w)} of the week`)}"/>`;
+  });
+  [...A.edges].reverse().forEach(e => {
+    const p = pos[e.a], q = pos[e.b];
+    lines += `<line x1="${p.x}" y1="${p.y}" x2="${q.x}" y2="${q.y}" stroke="${accent}" stroke-linecap="round" stroke-width="${1.2 + 9 * e.w / maxW}" stroke-opacity="${0.35 + 0.6 * e.w / maxW}"/>`;
+    hits += `<line x1="${p.x}" y1="${p.y}" x2="${q.x}" y2="${q.y}" stroke="transparent" stroke-width="14" data-tip="${esc(`${e.a} + ${e.b}\n${pct(e.w)} of the week\nFrom: ${e.tasks.join("; ")}`)}"/>`;
+  });
+  state.skills.forEach(s => {
+    const p = pos[s];
+    const on = A.skills.includes(s);
+    const deg = A.edges.filter(e => e.a === s || e.b === s).length;
+    const r = on ? 5 + 9 * Math.sqrt((strength[s] || 0) / maxS) : 4;
+    const lx = cx + (R + r + 12) * Math.cos(p.a), ly = cy + (R + r + 12) * Math.sin(p.a);
+    const anchor = Math.abs(Math.cos(p.a)) < 0.2 ? "middle" : Math.cos(p.a) > 0 ? "start" : "end";
+    const tip = on ? `${s}\nLinked to ${deg} of ${A.n - 1} other skills\nStrength: ${(strength[s] || 0).toFixed(2)}` : `${s}\nNo task in the role needs it`;
+    nodes += `<g data-tip="${esc(tip)}"><circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${on ? ink : line}" stroke="${surface}" stroke-width="2"/>
+      <text x="${lx}" y="${ly}" text-anchor="${anchor}" dominant-baseline="middle" font-size="13" style="fill:${on ? ink : ink3}">${esc(s)}</text>
+      <circle cx="${p.x}" cy="${p.y}" r="14" fill="transparent"/></g>`;
+  });
+  document.getElementById("net").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Skill network of the technical program manager role">${shades}${lines}${hits}${nodes}</svg>`;
+}
+
+function renderDensity(A) {
+  document.getElementById("dens").innerHTML = `
+    <div class="metric">
+      <span class="k">Density</span>
+      <span class="v">${pct(A.binary)}</span>
+      <span class="calc">${A.edges.length} linked pairs ÷ ${A.possible} possible pairs</span>
+      <p>Share of skill pairs that some task needs together. Time doesn't enter.</p>
+    </div>
+    <p class="note">${A.n} skills in the role, so ${A.n} × ${A.n - 1} ÷ 2 = ${A.possible} possible pairs.</p>
+    <div class="metric">
+      <span class="k">Triads</span>
+      <span class="calc">${A.triads.length} sets of three skills where all three links exist</span>
+      <p>A triad is ranked by its weakest link, so it is only as strong as the least-used of its three pairs. The shaded triangles in the network are the strongest triads.</p>
+    </div>`;
+}
+
+const SCENARIO = {
+  "Run sprint planning and cross-team syncs": "Perception and planning teams both say they are blocked on each other this sprint. How do you run the next sync?",
+  "Review integration plans for a new sensor or compute platform": "Here is a plan to move the fleet to a new lidar unit next quarter. What would you ask before approving it?",
+  "Track OEM vehicle integration milestones": "The truck manufacturer just pushed delivery of the next chassis build by six weeks. Walk me through what you do that day.",
+  "Run release readiness for a software drop to the test fleet": "A new planning release improves highway merges but has two open issues in rain. How do you run the go/no-go review?",
+  "Lead technical troubleshooting when the fleet or a build is blocked": "A release that passed simulation keeps hesitating at one intersection on the test route. Walk me through how you'd work out whether it's the sensors, the compute or the software, and who you'd pull in.",
+  "Coordinate on-road validation runs": "You have three weeks of test-fleet time to validate a release on a new freight lane. How do you plan the runs?",
+  "Align priorities across autonomy teams": "Two autonomy teams each want the same compute budget on the truck for their next feature. How do you get to a decision?",
+  "Lead reviews of disengagements and on-road incidents": "A safety driver took over twice on the same interchange this week. Walk me through how you run the review.",
+  "Write status reports for leadership": "Here is a dense engineering update on the release. Rewrite it for an executive who has two minutes.",
+  "Prepare regulatory and safety documentation": "A state regulator asks how you decided the system is safe to run without a driver on a new route. How do you put that answer together?",
+  "Manage sensor and compute supplier contracts": "A sensor supplier keeps missing quality targets, but requalifying a new one would take nine months. How do you handle the renewal?",
+};
+
+const FOLLOW_UP = {
+  "Autonomy system integration": "Which parts of the autonomy stack does this touch, and what breaks downstream if one of them changes?",
+  "Hardware–software integration": "How do hardware lead times change your plan compared with a software-only change?",  "Safety case and validation": "What evidence would you need before you were comfortable signing off, and who decides it's enough?",
+  "Field operations": "What does this mean for the safety drivers, the hubs and the routes on the ground?",
+  "Regulatory awareness": "Which rules or reporting duties apply here, and how did they shape what you did?",
+  "Scheduling & planning": "How does this change the plan or the dates, and how would you show the new timeline?",
+  "Risk management": "Which risks would you accept, which would you mitigate, and how do you decide?",
+  "Data analysis": "What data would you look at, and what result would change your mind?",
+  "Technical writing": "Show me how you would write it up. What would you leave out on purpose?",
+  "Stakeholder communication": "Who needs to hear what, and how do you shape the message for each group?",
+  "Negotiation": "What would each side give up, and where would you hold firm?",
+  "Budgeting": "What does it cost, and how do you weigh cost against the other options?",
+  "Team facilitation": "How do you get the group to agree, and what do you do about the people who don't?",
+};
+
+function pickTop(list, n, cap) {
+  if (!list.length) return [];
+  const cutoff = list[Math.min(n - 1, list.length - 1)].w - 1e-9;
+  return list.filter(x => x.w >= cutoff).slice(0, cap);
+}
+
+function mainTask(A, names) {
+  const idx = names.map(n => state.tasks.findIndex(t => t.name === n));
+  return state.tasks[idx.sort((x, y) => A.share[y] - A.share[x])[0]].name;
+}
+
+function renderTriads(A) {
+  const box = document.getElementById("triads");
+  const picked = pickTop(A.triads, 2, 4);
+  if (!picked.length) {
+    box.innerHTML = `<p class="note">No triads yet. A triad appears when a single task needs at least three skills.</p>`;
+    return;
+  }
+  const maxW = A.triads[0].w;
+  box.innerHTML = picked.map(tr => {
+    const counts = {};
+    tr.edges.forEach(e => e.tasks.forEach(n => { counts[n] = (counts[n] || 0) + 1; }));
+    const shareOf = n => A.share[state.tasks.findIndex(t => t.name === n)];
+    const task = tr.together.length ? mainTask(A, tr.together)
+      : Object.keys(counts).sort((a, b) => counts[b] - counts[a] || shareOf(b) - shareOf(a))[0];
+    const ask = SCENARIO[task] || `Tell me about a time you had to ${task.charAt(0).toLowerCase() + task.slice(1)}. What did you do, and how did it turn out?`;
+    const follow = s => FOLLOW_UP[s] || `Where did ${s.toLowerCase()} come in, and what would have gone differently without it?`;
+    const links = tr.edges.map(e => `<li><em>${esc(e.a)} + ${esc(e.b)}:</em> ${pct(e.w)} · ${esc(e.tasks.join("; "))}</li>`).join("");
+    const how = tr.together.length
+      ? `One task needs all three at once: ${esc(tr.together.join("; "))}.`
+      : `No single task needs all three; the links come from different tasks. Ask about a situation that combines them.`;
+    return `<article class="test triad">
+      <div class="test-head">
+        <h3>${tr.skills.map(esc).join(" + ")}</h3>
+        <div class="meta"><div class="track"><div class="fill" style="width:${100 * tr.w / maxW}%"></div></div>
+          <span>Weakest link <b>${pct(tr.w)}</b> of the week</span></div>
+      </div>
+      <div class="q"><span class="k">The three links</span><ul>${links}</ul><p class="note">${how}</p></div>
+      <div class="q"><span class="k">Ask</span><p>${esc(ask)}</p></div>
+      <div class="q"><span class="k">Follow up</span><ul>
+        ${tr.skills.map(s => `<li><em>${esc(s)}:</em> ${esc(follow(s))}</li>`).join("")}
+      </ul></div>
+      <p class="listen">Listen for one example that draws on all three at once. A candidate who covers each skill with a different story has the skills, but hasn't shown they can hold all three together.</p>
+    </article>`;
+  }).join("");
+}
+
+function renderTests(A) {
+  const box = document.getElementById("tests");
+  if (!A.edges.length) {
+    box.innerHTML = `<p class="note">No pairs yet. A pair appears when a task needs at least two skills.</p>`;
+    return;
+  }
+  const picked = pickTop(A.edges, 5, 8);
+  const maxW = A.edges[0].w;
+  box.innerHTML = picked.map(e => {
+    const idx = e.tasks.map(n => state.tasks.findIndex(t => t.name === n));
+    const main = idx.sort((x, y) => A.share[y] - A.share[x])[0];
+    const task = state.tasks[main].name;
+    const ask = SCENARIO[task] || `Tell me about a time you had to ${task.charAt(0).toLowerCase() + task.slice(1)}. What did you do, and how did it turn out?`;
+    const follow = s => FOLLOW_UP[s] || `Where did ${s.toLowerCase()} come in, and what would have gone differently without it?`;
+    const others = e.tasks.length - 1;
+    return `<article class="test">
+      <div class="test-head">
+        <h3>${esc(e.a)} + ${esc(e.b)}</h3>
+        <div class="meta"><div class="track"><div class="fill" style="width:${100 * e.w / maxW}%"></div></div>
+          <span><b>${pct(e.w)}</b> of the week · from ${esc(task)}${others ? ` and ${others} other task${others > 1 ? "s" : ""}` : ""}</span></div>
+      </div>
+      <div class="q"><span class="k">Ask</span><p>${esc(ask)}</p></div>
+      <div class="q"><span class="k">Follow up</span><ul>
+        <li><em>${esc(e.a)}:</em> ${esc(follow(e.a))}</li>
+        <li><em>${esc(e.b)}:</em> ${esc(follow(e.b))}</li>
+      </ul></div>
+      <p class="listen">Listen for one example where ${esc(e.a.toLowerCase())} shapes the ${esc(e.b.toLowerCase())} decision, or the reverse. Two separate stories, one per skill, don't show the pair.</p>
+    </article>`;
+  }).join("");
+}
+
+function renderBudget(A) {
+  const week = state.week, total = A.total;
+  const fmt = v => (Math.round(v * 10) / 10).toString().replace(/\.0$/, "");
+  const bar = document.getElementById("budgetBar");
+  const msg = document.getElementById("budgetMsg");
+  if (total > week) {
+    const fillPct = 100 * week / total;
+    bar.innerHTML = `<div class="fill" style="width:${fillPct}%"></div><div class="over" style="width:${100 - fillPct}%"></div>`;
+    msg.className = "budget-msg is-over";
+    msg.textContent = `${fmt(total)} h planned · over by ${fmt(total - week)} h`;
+  } else {
+    bar.innerHTML = `<div class="fill" style="width:${100 * total / week}%"></div>`;
+    msg.className = "budget-msg is-under";
+    msg.textContent = total === week ? `${fmt(total)} of ${fmt(week)} h planned` : `${fmt(total)} of ${fmt(week)} h planned · ${fmt(week - total)} h unassigned`;
+  }
+}
+
+function setWeek(v) {
+  state.week = v;
+  document.getElementById("week").value = v;
+  document.querySelectorAll("#weekPresets button").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.h === v)));
+  update();
+}
+document.getElementById("week").oninput = e => {
+  const v = parseFloat(e.target.value);
+  if (isFinite(v) && v > 0) {
+    state.week = v;
+    document.querySelectorAll("#weekPresets button").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.h === v)));
+    update();
+  }
+};
+document.querySelectorAll("#weekPresets button").forEach(b => { b.onclick = () => setWeek(+b.dataset.h); });
+
+function update() {
+  const A = analyze();
+  renderBudget(A);
+  state.tasks.forEach((t, i) => { const el = document.getElementById("share-" + t.id); if (el) el.textContent = `≈ ${fmtH(A.hours[i])} h · ${pct(A.share[i])}`; });
+  renderNetwork(A);
+  renderDensity(A);
+  renderTests(A);
+  renderTriads(A);
+}
+
+function renderAll() {
+  renderGrid();
+  update();
+}
+
+document.getElementById("reset").onclick = () => {
+  state = fresh();
+  setMsg("taskMsg", "");
+  setMsg("skillMsg", "");
+  renderGrid();
+  setWeek(state.week);
+};
+
+const tip = document.getElementById("tip");
+function showTip(el, x, y) {
+  tip.textContent = el.getAttribute("data-tip");
+  tip.hidden = false;
+  const r = tip.getBoundingClientRect();
+  let left = x + 14, top = y + 14;
+  if (left + r.width > window.innerWidth - 8) left = x - r.width - 14;
+  if (top + r.height > window.innerHeight - 8) top = y - r.height - 14;
+  tip.style.left = Math.max(8, left) + "px";
+  tip.style.top = Math.max(8, top) + "px";
+}
+document.addEventListener("pointermove", e => {
+  const el = e.target.closest && e.target.closest("[data-tip]");
+  if (el) showTip(el, e.clientX, e.clientY); else tip.hidden = true;
+});
+document.addEventListener("pointerdown", e => {
+  const el = e.target.closest && e.target.closest("[data-tip]");
+  if (el && e.pointerType !== "mouse") showTip(el, e.clientX, e.clientY);
+});
+document.addEventListener("scroll", () => { tip.hidden = true; }, { passive: true });
+
+renderGrid();
+setWeek(state.week);
+const mq = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+if (mq && mq.addEventListener) mq.addEventListener("change", update);
+new MutationObserver(update).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+</script>
+
+</body>
+</html>
